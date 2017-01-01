@@ -27,10 +27,10 @@ List<Client> userlist= new ArrayList<>();
         for (Client c : handler.getClients()) {
             userlist.add(c);
             if(client.checkstatus(c)){
-              content.append(c.getUsername()).append("(").append("ACTIVE").append(")").append("\r\n");
+              content.append(c.getUsername()).append("(").append(c.getStatus()).append(")").append("\r\n");
             }
             else{
-                content.append(c.getUsername()).append("(").append("INACTIVE").append(")").append("\r\n");
+                content.append(c.getUsername()).append("(").append(c.getStatus()).append(")").append("\r\n");
             }
         }
         ps.println(content.toString());   
