@@ -19,7 +19,7 @@ public Enum status;
     public void execute(Client client, String[] tokens, String msg) throws IOException {
         if(tokens[1].equalsIgnoreCase("active")){
             status=clientstatus.ACTIVE;
-        }else if(tokens[1].equalsIgnoreCase("active")){
+        }else if(tokens[1].equalsIgnoreCase("inactive")){
             status=clientstatus.INACTIVE;
         }
         client.setStatus(status);
