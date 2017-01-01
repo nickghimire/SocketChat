@@ -5,18 +5,24 @@
  */
 package com.leapfrog.clientserver.handler;
 
-import com.leapfrog.clientserver.command.BlockCommand;
 import com.leapfrog.clientserver.command.ChatCommand;
 import com.leapfrog.clientserver.command.ChatCommandFactory;
+import com.leapfrog.clientserver.command.ListCommand;
+import com.leapfrog.clientserver.command.PrivateMessageCommand;
+import com.leapfrog.clientserver.command.PublicMessageCommand;
 import com.leapfrog.clientserver.dao.UserDAO;
 import com.leapfrog.clientserver.dao.impl.UserDAOImpl;
 import com.leapfrog.clientserver.entity.User;
-import com.leapfrog.clientserver.handler.Client.clientstatus;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -36,6 +42,7 @@ public class ClientListener extends Thread {
         this.handler = handler;
         ps = new PrintStream(socket.getOutputStream());
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
     }
 
     @Override
@@ -47,11 +54,12 @@ public class ClientListener extends Thread {
             String line = " ";
             while (!(line = reader.readLine()).equalsIgnoreCase("exit")) {
 
-                String[] tokens = line.split("::");
+                String[] tokens = line.split(";;");
                 ChatCommand cmd = ChatCommandFactory.get(tokens[0]);
 
                 if (cmd != null) {
                     cmd.setHandler(handler);
+
                     cmd.execute(client, tokens, line);
 
                 }
@@ -65,30 +73,59 @@ public class ClientListener extends Thread {
     }
 
     private boolean doLogin() throws IOException {
-        ps.println("Welcome to server");
-        ps.println("Enter your user name");
+       ps.println("Welcome to server");
+        ps.println("Login or SignUp");
+        if (reader.readLine().equalsIgnoreCase("login")) {
+            ps.println("Enter your user name");
 
-        String username = reader.readLine();
+            String username = reader.readLine();
 
-        ps.println("Enter your Password");
-        String password = reader.readLine();
+            ps.println("Enter your Password");
+            String password = reader.readLine();
 
-        User user = userDAO.Login(username, password);
-        if (user == null) {
-            ps.println("User Name Invalid");
-            return false;
-        } else if (!user.isStatus()) {
-            ps.println("Account Not Activated");
-            return false;
-        } else {
-            System.out.println(username);
-            
-            client = new Client(username, socket);
-            client.setStatus(clientstatus.ACTIVE);
-            handler.addClient(client);
+            User user = userDAO.Login(username, password);
+            if (user == null) {
+                ps.println("User Name Invalid");
+                return false;
+            } else if (!user.isStatus()) {
+                ps.println("Account Not Activated");
+                return false;
+            } else {
+                System.out.println(username);
 
-            ps.println(" Welcome to group: " + username);
+                client = new Client(username, socket);
+                handler.addClient(client);
+
+                ps.println(" Thank you " + username);
+                return true;
+            }
+        } else if (reader.readLine().equalsIgnoreCase("signup")) {
+            //List<User> user = new ArrayList<>();
+            User userdetails= new User();
+            ps.println("Enter new name:");
+            String newName = reader.readLine();
+            userdetails.setUserName(newName);
+            ps.println("Enter new password:");
+            String newPasswrod = reader.readLine();
+            userdetails.setPassword(newPasswrod);
+            ps.println("Enter new Email:");
+            String newEmail = reader.readLine();
+            userdetails.setEmail(newEmail);
+            userdetails.setGroup_id(1);
+            userdetails.setStatus(true);
+            //user.add(userdetails);
+           try {
+               userDAO.insert(userdetails);
+           } catch (ClassNotFoundException ex) {
+               Logger.getLogger(ClientListener.class.getName()).log(Level.SEVERE, null, ex);
+           } catch (SQLException ex) {
+               Logger.getLogger(ClientListener.class.getName()).log(Level.SEVERE, null, ex);
+           }
+            ps.println("New account created successfully!");
             return true;
+        } else {
+            return false;
+        
         }
 
     }

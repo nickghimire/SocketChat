@@ -14,7 +14,7 @@ import java.util.List;
 public interface UserDAO {
     int insert(User c) throws ClassNotFoundException,SQLException;
     int update(User c) throws ClassNotFoundException,SQLException;
-    int delete(User id) throws ClassNotFoundException,SQLException;
+    int delete(int  id) throws ClassNotFoundException,SQLException;
     List<User> getAll() throws ClassNotFoundException,SQLException;
     User getById(int id)throws ClassNotFoundException,SQLException;
   //  boolean insert(User user);
