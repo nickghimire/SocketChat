@@ -74,7 +74,7 @@ List<Client> blockedlist=new ArrayList<>();
         return blockedlist;
     }
     public boolean checkstatus(Client client){
-        if(client.getStatus().equals(ACTIVE)){
+        if(client.getStatus().equals(clientstatus.ACTIVE)){
             return true;
         }
         return false;
